@@ -8,12 +8,17 @@
 // 3 test array>    ... fetch value at position 3 from array 'test'
 // ********************************************************************************
 
-: ARRAY DUP 1+ ALLOCATE TUCK ! CREATE DICTP LAST , PUSH , RETURN ;
-: ?ARRAY.in.bounds COUNT 2 pick 0 rot 1- between ;
-: ARRAY.Check.Bounds ?ARRAY.in.bounds dup 0= 
-	if 
+: ARRAY DUP 1+ ALLOCATE TUCK ! CREATE DICTP LAST , PUSH , RETURN, ;
+// ( n array -- bool )
+: ?ARRAY.in.bounds @ 0 swap between ;
+
+( n array -- bool )
+: ARRAY.Check.Bounds ?ARRAY.in.bounds
+	dup 0= if 
 		." index out of bounds." 
 	then ;
-: >ARRAY ( val pos array -- ) Array.Check.Bounds if + ! else 2drop drop then ;
-: ARRAY> ( pos array -- val ) Array.Check.Bounds if + @ else 2drop then ;
+: >ARRAY ( val pos array -- ) 2dup Array.Check.Bounds if count drop + ! else 2drop drop then ;
+: ARRAY> ( pos array -- val ) 2dup Array.Check.Bounds if count drop + @ else 2drop then ;
 : .ARRAY COUNT 0 DO DUP @ . 1+ LOOP DROP ;
+
+20 array eee

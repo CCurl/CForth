@@ -69,36 +69,89 @@ forget .Dis.4th.
 :NONAME " break" NONAME;  48 mcode >array
 :NONAME " return" NONAME;  49 mcode >array
 
-: ?.uses2 // ( addr1 instr -- addr2 )
-	dup  3 = if drop dup @ . 1+ exit then   // ( literal )
-	dup 21 = if drop dup @ . 1+ exit then   // IF 
-	dup 27 = if drop dup @ . 1+ exit then   // GOTO 
-	dup 33 = if drop dup @ . 1+ exit then   // 
-	drop
+: .sc ."  ; " ;
+
+: code.literal 3 ;
+: code.if 21 ;
+: code.goto 27 ;
+: code.dictp 33 ;
+: code.return 49 ;
+
+// ?uses2 ( instr -- (instr true)|false )
+: ?uses2 
+	dup code.literal = if drop true exit then
+	dup code.if = if drop true exit then
+	dup code.goto = if drop true exit then
+	dup code.dictp = if drop true exit then
+	drop false
 	;
 
-// ( instr -- is-prim )
-: .mcode dup mcode ?array.in.bounds
+// ?is.prim ( instr -- is-prim )
+: is.prim dup mcode ?array.in.bounds 
 	if
-		+ @ ?dup 
+		mcode array> 
+	else
+		drop false
+	then ;
+
+// .mcode ( instr -- is-prim )
+: .mcode dup is.prim
+	if
+		mcode array> dup
 		if 
-			swap . .bl execute count type true 
-		else 
-			drop false 
+			execute count type true 
 		then
 	else
 		drop false
 	then ;
 
-: .mcodes 100 0 do i .mcode if .cr then loop ;
-: dis.addr ( addr -- addr )
-	dup . ." : " 
-	dup @ .mcode 
-	if 
-		1+ dup 1- @ ?.uses2 
-	else 
-		. drop 1+
-	then
-	.cr  ;
+: .mcodes mcode @ 0 do i .mcode if .cr then loop ;
 
-: dis swap begin 2dup >= if dis.addr else 2drop exit then repeat ;
+// ?is.word ( addr -- (dict-head true)|false )
+: ?is.word dup @ code.dictp =
+	if 
+		body>head dup last <=
+		if drop false else true then
+	else
+		drop false
+	then
+;
+
+// ( head-addr -- )
+: .word.name 
+	if 
+	then ;
+
+: dis.addr ( addr1 -- addr2 )
+	dup >R
+	dup . ." : " 
+	dup @ dup . dup ?uses2
+	if 
+		R> drop over 1+ dup >R @ . 
+	else
+		."     "
+	then 
+	.sc dup .mcode 
+	if
+		code.dictp = 
+		if
+			.BL R@ @ head>name count type
+		then
+	else
+		?is.word
+		if head>name count type then
+	then
+	.cr drop R> ;
+
+: dis swap 1- 
+	begin 
+		1+ 
+		2dup >= 
+		if 
+			dup @ code.dictp = 
+			if .cr then
+			dis.addr
+		else 
+			2drop exit 
+		then 
+	repeat ;

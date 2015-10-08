@@ -86,7 +86,7 @@ int go()
 		if (input.CompareNoCase(_T("restart")) == 0)
 		{
 			init();
-			strcpy_s(line, sizeof(line), "include ..\\4th\\forthos.4th");
+			strcpy_s(line, sizeof(line), "include forthos");
 			len = 3;
 		}
 
@@ -133,15 +133,18 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			}
 			else if (arg.CompareNoCase(_T("bs")) == 0)
 			{
-				cmd.Format(_T("include ..\\4th\\forthos.4th"), arg);
+				cmd.Format(_T("include forthos"), arg);
 				printf("%S ...", cmd);
 				myOS->ParseInput(cmd);
+				printf("\n", cmd);
 			}
 			else if (arg.Left(8).CompareNoCase(_T("include:")) == 0)
 			{
 				arg = arg.Mid(8);
 				cmd.Format(_T("include %s"), arg);
+				printf("%S ...", cmd);
 				myOS->ParseInput(cmd);
+				printf("\n", cmd);
 			}
 		}
 	}
