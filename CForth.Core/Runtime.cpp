@@ -420,13 +420,6 @@ void ForthOS::EQ()
 	PUSH((arg1 == arg2) ? -1 : 0);
 }
 
-void ForthOS::NEQ()
-{
-	int arg2 = POP();
-	int arg1 = POP();
-	PUSH((arg1 != arg2) ? -1 : 0);
-}
-
 void ForthOS::LT()
 {
 	PUSH((POP() > POP()) ? -1 : 0);
@@ -524,30 +517,6 @@ void ForthOS::GOTO()
 	IP = MemGet(IP);
 }
 
-void ForthOS::DOT()
-{
-	int val = POP();
-	{
-		CString x;
-		int base = MemGet(BASE_ADDRESS);
-		if (base == 10)
-			x.Format(_T(" %d"), val);
-		else if (base == 16)
-			x.Format(_T(" %X"), val);
-		else
-			FormatNumber(base, val, x);
-		AppendOutput(x);
-	}
-}
-
-void ForthOS::UNUSED1()
-{
-}
-
-void ForthOS::NOOP()
-{
-}
-
 //void ForthOS::CALL()
 //{
 //	if ((MemGet(DEBUGFLAG_ADDRESS) == 1) && (output_fp != NULL))
@@ -563,12 +532,6 @@ void ForthOS::NOOP()
 //	IP = addr;
 //}
 
-void ForthOS::OVER()
-{
-	PUSH(1);
-	PICK();
-}
-
 void ForthOS::EMIT()
 {
 	int val = POP();
@@ -578,16 +541,6 @@ void ForthOS::EMIT()
 void ForthOS::DICTP()
 {
 	IP++;
-}
-
-void ForthOS::ONEMINUS()
-{
-	PUSH(POP() - 1);
-}
-
-void ForthOS::NOT()
-{
-	PUSH((POP() == 0) ? -1 : 0);
 }
 
 void ForthOS::FOPEN()

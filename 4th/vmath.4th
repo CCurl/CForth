@@ -1,6 +1,6 @@
 // Vortex math stuff ...
 
-: VMath.4th ;
+: VMath.module ;
 
 : reduce dup 
 	if 

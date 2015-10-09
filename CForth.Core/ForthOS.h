@@ -187,7 +187,6 @@ class ForthOS
 	void MULT();
 	void DIV();
 	void EQ();
-	void NEQ();
 	void LT();
 	void GT();
 	void TO_R();
@@ -200,14 +199,8 @@ class ForthOS
 	void LOOP();
 	void PLUSLOOP();
 	void GOTO();
-	void DOT();
-	void UNUSED1();
-	void NOOP();
-	void OVER();
 	void EMIT();
 	void DICTP();
-	void ONEMINUS();
-	void NOT();
 	void FOPEN();
 	void FCLOSE();
 	void FREAD();

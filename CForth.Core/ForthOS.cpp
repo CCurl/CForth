@@ -41,7 +41,6 @@ ForthOS::ForthOS(int memSize)
 	prims[I_MULT] = &ForthOS::MULT;
 	prims[I_DIV] = &ForthOS::DIV;
 	prims[I_EQ] = &ForthOS::EQ;
-	prims[I_NEQ] = &ForthOS::NEQ;
 	prims[I_LT] = &ForthOS::LT;
 	prims[I_GT] = &ForthOS::GT;
 	prims[I_TO_R] = &ForthOS::TO_R;
@@ -54,14 +53,8 @@ ForthOS::ForthOS(int memSize)
 	prims[I_LOOP] = &ForthOS::LOOP;
 	prims[I_PLUSLOOP] = &ForthOS::PLUSLOOP;
 	prims[I_GOTO] = &ForthOS::GOTO;
-	prims[I_DOT] = &ForthOS::DOT;
-	prims[I_UNUSED1] = &ForthOS::UNUSED1;
-	prims[I_NOOP] = &ForthOS::NOOP;
-	prims[I_OVER] = &ForthOS::OVER;
 	prims[I_EMIT] = &ForthOS::EMIT;
 	prims[I_DICTP] = &ForthOS::DICTP;
-	prims[I_ONEMINUS] = &ForthOS::ONEMINUS;
-	prims[I_NOT] = &ForthOS::NOT;
 	prims[I_FOPEN] = &ForthOS::FOPEN;
 	prims[I_FCLOSE] = &ForthOS::FCLOSE;
 	prims[I_FREAD] = &ForthOS::FREAD;

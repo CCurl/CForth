@@ -76,7 +76,7 @@ CString instrNames[I_FGETC+1] =
 	_T("I_MULT"),
 	_T("I_DIV"),
 	_T("I_EQ"),
-	_T("I_NEQ"),
+	_T("(obsolete NEQ)"),
 	_T("I_LT"),
 	_T("I_GT"),
 	_T("I_TO_R"),
@@ -89,14 +89,14 @@ CString instrNames[I_FGETC+1] =
 	_T("I_LOOP"),
 	_T("I_PLUSLOOP"),
 	_T("I_GOTO"),
-	_T("I_DOT"),
-	_T("I_UNUSED1"),
-	_T("I_NOOP"),
-	_T("I_OVER"),
+	_T("(obsolete DOT)"),
+	_T("(obsolete TYPE)"),
+	_T("(obsolete CALL)"),
+	_T("(obsolete OVER)"),
 	_T("I_EMIT"),
 	_T("I_DICTP"),
-	_T("I_ONEMINUS"),
-	_T("I_NOT"),
+	_T("(obsolete -1)"),
+	_T("(obsolete 0=)"),
 	_T("I_FOPEN"),
 	_T("I_FCLOSE"),
 	_T("I_FREAD"),
@@ -261,10 +261,6 @@ int ForthOS::DumpInstr_ASM(int xt, CString& ret)
 		ret.AppendFormat(_T("call fOnePlus ; 1+"));
 		break;
 
-	case I_ONEMINUS:
-		ret.AppendFormat(_T("call fOneMinus ; 1-"));
-		break;
-
 	case I_PLUS:
 		ret.AppendFormat(_T("call fPlus ; +"));
 		break;
@@ -285,14 +281,6 @@ int ForthOS::DumpInstr_ASM(int xt, CString& ret)
 		ret.AppendFormat(_T("call fEquals ; ="));
 		break;
 
-	case I_NOT:
-		ret.AppendFormat(_T("call fNot ; NOT"));
-		break;
-
-	case I_NEQ:
-		ret.AppendFormat(_T("call fNotEquals ; <>"));
-		break;
-
 	case I_GT:
 		ret.AppendFormat(_T("call fGT ; >"));
 		break;
@@ -301,16 +289,8 @@ int ForthOS::DumpInstr_ASM(int xt, CString& ret)
 		ret.AppendFormat(_T("call fLT ; <"));
 		break;
 
-	case I_OVER:
-		ret.AppendFormat(_T("call fOver ; OVER"));
-		break;
-
 	case I_PICK:
 		ret.AppendFormat(_T("call fPick ; PICK"));
-		break;
-
-	case I_DOT:
-		ret.AppendFormat(_T("call fDot ; ."));
 		break;
 
 	case I_EMIT:

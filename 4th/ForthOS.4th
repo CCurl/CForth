@@ -1,4 +1,4 @@
-: .ForthOS.4th. ;
+: .ForthOS.BootStrap. ;
 
 : STATE 3 ;
 
@@ -48,7 +48,7 @@
 : *      ?] IF 12 , ELSE [ 12 , ] THEN ; IMMEDIATE
 : /      ?] IF 13 , ELSE [ 13 , ] THEN ; IMMEDIATE
 : =      ?] IF 14 , ELSE [ 14 , ] THEN ; IMMEDIATE
-: <>     ?] IF 15 , ELSE [ 15 , ] THEN ; IMMEDIATE
+//             15 used to be <> , now it is obsolete
 : <      ?] IF 16 , ELSE [ 16 , ] THEN ; IMMEDIATE
 : >      ?] IF 17 , ELSE [ 17 , ] THEN ; IMMEDIATE
 : >R     ?] IF 18 , ELSE [ 18 , ] THEN ; IMMEDIATE
@@ -61,14 +61,14 @@
 : LOOP   ?] IF 25 , ELSE [ 25 , ] THEN ; IMMEDIATE
 : +LOOP  ?] IF 26 , ELSE [ 26 , ] THEN ; IMMEDIATE
 : GOTO         27 , ;
-: .      ?] IF 28 , ELSE [ 28 , ] THEN ; IMMEDIATE
+//             28 used to be . (DOT) , now it is obsolete
 //             29 used to be TYPE, now it is obsolete
-// : CALL         30 , ;                              // I_CALL
-: OVER   ?] IF 31 , ELSE [ 31 , ] THEN ; IMMEDIATE // not required as an opcode, for performance
+//             30 used to be CALL, now it is obsolete
+//             31 used to be OVER, now it is obsolete
 : EMIT   ?] IF 32 , ELSE [ 32 , ] THEN ; IMMEDIATE
 : DICTP        33 , ;                              // NOOP to skip over the dictionary entry back pointer
-: 1-     ?] IF 34 , ELSE [ 34 , ] THEN ; IMMEDIATE // not required as an opcode, for performance
-: 0=     ?] IF 35 , ELSE [ 35 , ] THEN ; IMMEDIATE // not required as an opcode, for performance
+//             34 used to be -1, now it is obsolete
+//             35 used to be 0=, now it is obsolete
 : fopen  ?] IF 36 , ELSE [ 36 , ] THEN ; IMMEDIATE 
 : fclose ?] IF 37 , ELSE [ 37 , ] THEN ; IMMEDIATE 
 : fread  ?] IF 38 , ELSE [ 38 , ] THEN ; IMMEDIATE 
@@ -82,26 +82,31 @@
 : BEGIN  ?] IF HERE   THEN ; IMMEDIATE 
 : REPEAT ?] IF GOTO , THEN ; IMMEDIATE
 
-
 // *************************************************************************************************
 : ( SOURCE >IN @ DO DUP I + @ ')' = IF DROP I 1+ >IN ! LEAVE THEN LOOP ; IMMEDIATE
 
-: <= 1+ < ;
-: >= 1- > ;
+: 1- 1 - ;
+: 0= 0 = ;
+: <> = 0= ;
+: <= > 0= ;
+: >= < 0= ;
 : 2* 2 * ;
 : 2/ 2 / ;
 : 2+ 1+ 1+ ;
 : .dec. dup @ 1- swap ! ;
+: true -1 ; 
+: false 0 ;
 
+: 2DROP DROP DROP ;
+: 2DUP OVER OVER ;
+: ?DUP DUP IF DUP THEN ;
+
+: CLR DEPTH ?DUP IF 0 DO DROP LOOP THEN ;
 : NIP SWAP DROP ;
 : TUCK SWAP OVER ;
 : -ROT ROT ROT ;
 : NEGATE -1 * ;
 : ABS DUP 0 < IF NEGATE THEN ;
-
-: 2DROP DROP DROP ;
-: 2DUP OVER OVER ;
-: ?DUP DUP IF DUP THEN ;
 
 : mod 2dup / * - ;
 : decimal 10 base ! ;
@@ -197,7 +202,21 @@
 : NAME>HEAD 3 - ;
 : BODY>HEAD 1+ @ ;
 
-: .S DEPTH . '-' EMIT .BL DEPTH IF -1 DEPTH 1- 1- DO I PICK . -1 +LOOP THEN ;
+
+// <# #S #> ...
+variable #S.buf 32 allot
+here 1- constant #S.bufEnd
+variable #S.isNeg
+: <# #S.buf 0! dup 0 < #S.isNeg ! abs ;
+: #S.buf+ #S.bufEnd #S.buf @ - ! #S.buf .inc. ;
+: # /mod dup 9 > if 10 - 'A' + else '0' + then #S.buf+ ;
+: #S # begin ?dup if # else exit then repeat ;
+: #S.zFill dup #S.buf @ > if #S.buf @ do '0' #S.buf+ loop else drop then ;
+: #> #s.isNeg @ if '-' #S.buf+ false #S.isNeg ! then #S.buf @ dup #S.bufEnd swap - >R R@ ! R> count ;
+: #S.rJ dup #S.buf @ > if #S.buf @ do BL #S.buf+ loop else drop then ;
+: . <# #S #> type .BL ;
+
+: .S '<' EMIT DEPTH <# #S #> type '>' EMIT .BL DEPTH IF -1 DEPTH 1- 1- DO I PICK . -1 +LOOP THEN ;
 
 : forget.last  LAST HEAD>BODY (HERE) ! LAST DUP @ + 1+ (LAST) ! ;
 
@@ -342,21 +361,11 @@ variable tmp.sp 32 allot
 : tmp.swap tmp> tmp> swap >tmp >tmp ;
 : tmp.drop tmp> drop ;
 
-: true -1 ; : false 0 ;
-
-// <# #S #> ...
-variable #S.buf 32 allot
-here 1- constant #S.bufEnd
-variable #S.isNeg
-: <# #S.buf 0! dup 0 < #S.isNeg ! abs ;
-: #S.buf+ #S.bufEnd #S.buf @ - ! #S.buf .inc. ;
-: # /mod dup 9 > if 10 - 'A' + else '0' + then #S.buf+ ;
-: #S # begin ?dup if # else exit then repeat ;
-: #S.zFill dup #S.buf @ > if #S.buf @ do '0' #S.buf+ loop else drop then ;
-: #> #s.isNeg @ if '-' #S.buf+ false #S.isNeg ! then #S.buf @ dup #S.bufEnd swap - >R R@ ! R> count ;
-: #S.rJ dup #S.buf @ > if #S.buf @ do BL #S.buf+ loop else drop then ;
+: SPACES 0 DO .BL LOOP ;
 
 : dump 0 do dup @ <# #S 4 #S.zFill #> type .BL 1+ loop drop ;
+.cr .cr words
+.cr .cr ." everything look ok?"
 break;
 
 // : src (source) @ ;

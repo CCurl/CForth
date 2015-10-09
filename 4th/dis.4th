@@ -1,5 +1,4 @@
-forget .Dis.4th.
-: .Dis.4th. ;
+: DIS.Module ;
 
 // *************************************************************************************************
 // Addresses
@@ -41,26 +40,28 @@ forget .Dis.4th.
 :NONAME " -" NONAME;  11 mcode >array
 :NONAME " *" NONAME;  12 mcode >array
 :NONAME " /" NONAME;  13 mcode >array
-:NONAME " =" NONAME;  14 mcode >array
-:NONAME " <>" NONAME;  15 mcode >array
-:NONAME " <" NONAME;  16 mcode >array
-:NONAME " >" NONAME;  17 mcode >array
+// 15 - obsolete
+:NONAME " ="  NONAME;  14 mcode >array
+:NONAME " <"  NONAME;  16 mcode >array
+:NONAME " >"  NONAME;  17 mcode >array
 :NONAME " >R" NONAME;  18 mcode >array
 :NONAME " R>" NONAME;  19 mcode >array
 :NONAME " R@" NONAME;  20 mcode >array
 :NONAME " IF" NONAME;  21 mcode >array
 :NONAME " do" NONAME;  22 mcode >array
-:NONAME " I" NONAME;  23 mcode >array
+:NONAME " I"  NONAME;  23 mcode >array
 :NONAME " leave" NONAME;  24 mcode >array
 :NONAME " loop" NONAME;  25 mcode >array
 :NONAME " +loop" NONAME;  26 mcode >array
 :NONAME " goto" NONAME;  27 mcode >array
-:NONAME " ." NONAME;  28 mcode >array
-:NONAME " over" NONAME;  31 mcode >array
+// 28 - obsolete
+// 29 - obsolete
+// 30 - obsolete
+// 31 - obsolete
 :NONAME " emit" NONAME;  32 mcode >array
 :NONAME " dictp" NONAME;  33 mcode >array
-:NONAME " 1-" NONAME;  34 mcode >array
-:NONAME " 0=" NONAME;  35 mcode >array
+// 34 - obsolete
+// 35 - obsolete
 :NONAME " fopen" NONAME;  36 mcode >array
 :NONAME " fclose" NONAME;  37 mcode >array
 :NONAME " fread" NONAME;  38 mcode >array
@@ -125,11 +126,11 @@ forget .Dis.4th.
 : dis.addr ( addr1 -- addr2 )
 	dup >R
 	dup . ." : " 
-	dup @ dup . dup ?uses2
+	dup @ dup <# #S 2 #S.zFill 4 #S.rJ #> .BL type dup ?uses2
 	if 
-		R> drop over 1+ dup >R @ . 
+		R> drop over 1+ dup >R @ <# #S 5 #S.rJ #> .BL type
 	else
-		."     "
+		6 SPACES
 	then 
 	.sc dup .mcode 
 	if

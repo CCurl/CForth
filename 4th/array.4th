@@ -8,6 +8,8 @@
 // 3 test array>    ... fetch value at position 3 from array 'test'
 // ********************************************************************************
 
+: ARRAY.Module ;
+
 : ARRAY DUP 1+ ALLOCATE TUCK ! CREATE DICTP LAST , PUSH , RETURN, ;
 // ( n array -- bool )
 : ?ARRAY.in.bounds @ 0 swap between ;
@@ -20,5 +22,3 @@
 : >ARRAY ( val pos array -- ) 2dup Array.Check.Bounds if count drop + ! else 2drop drop then ;
 : ARRAY> ( pos array -- val ) 2dup Array.Check.Bounds if count drop + @ else 2drop then ;
 : .ARRAY COUNT 0 DO DUP @ . 1+ LOOP DROP ;
-
-20 array eee
