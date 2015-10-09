@@ -96,7 +96,7 @@
 : NIP SWAP DROP ;
 : TUCK SWAP OVER ;
 : -ROT ROT ROT ;
-: NEGATE 0 SWAP - ;
+: NEGATE -1 * ;
 : ABS DUP 0 < IF NEGATE THEN ;
 
 : 2DROP DROP DROP ;
@@ -106,16 +106,18 @@
 : mod 2dup / * - ;
 : decimal 10 base ! ;
 : hex 16 base ! ;
+: binary 2 base ! ;
 
 : +! dup @ rot + swap ! ;
 : -! dup @ rot - swap ! ;
+: 0! 0 SWAP ! ;
 
 // string stuff
 : string, count dup , 0 do dup @ ,    1+ loop drop ;
 : TYPE ( addr n -- )  0 DO DUP @ EMIT 1+ LOOP DROP ;
 
 : STR+ DUP .INC. DUP @ + ! ;      // ( C ADDR -- ) 
-: STRCLR 0 SWAP ! ;               // ( ADDR -- ) 
+: STRCLR 0! ;               // ( ADDR -- ) 
 
 // ( from-addr to-addr -- ) 
 : STRCAT SWAP COUNT 0 DO 
@@ -320,11 +322,11 @@ VARIABLE .cw.
 : fopen.read.binary " rb" fopen ;
 : fopen.write.text " wt" fopen ;
 : fopen.write.binary " wb" fopen ;
-: fread.line ." fread.line not implemented yet." ;
+: fread.line ." sorry." ;
 
 : debug.on .cr 1 DBG.FLG ! ;
 : debug.on.high .cr 2 DBG.FLG ! ;
-: debug.off 0 DBG.FLG ! .cr ;
+: debug.off DBG.FLG 0! .cr ;
 
 // Simple temporary variables.
 // Sure, these could have more error checking.
@@ -332,7 +334,7 @@ VARIABLE .cw.
 // This is all I need for now ... :)
 
 variable tmp.sp 32 allot
-: 0tmp.sp 0 tmp.sp ! ;
+: 0tmp.sp tmp.sp 0! ;
 : tmp@ tmp.sp @ if tmp.sp dup @ + @ then ;
 : !tmp tmp.sp @ if tmp.sp dup @ + ! then ;
 : >tmp tmp.sp @ 31 < if tmp.sp .inc. !tmp then ;
@@ -342,6 +344,19 @@ variable tmp.sp 32 allot
 
 : true -1 ; : false 0 ;
 
+// <# #S #> ...
+variable #S.buf 32 allot
+here 1- constant #S.bufEnd
+variable #S.isNeg
+: <# #S.buf 0! dup 0 < #S.isNeg ! abs ;
+: #S.buf+ #S.bufEnd #S.buf @ - ! #S.buf .inc. ;
+: # /mod dup 9 > if 10 - 'A' + else '0' + then #S.buf+ ;
+: #S # begin ?dup if # else exit then repeat ;
+: #S.zFill dup #S.buf @ > if #S.buf @ do '0' #S.buf+ loop else drop then ;
+: #> #s.isNeg @ if '-' #S.buf+ false #S.isNeg ! then #S.buf @ dup #S.bufEnd swap - >R R@ ! R> count ;
+: #S.rJ dup #S.buf @ > if #S.buf @ do BL #S.buf+ loop else drop then ;
+
+: dump 0 do dup @ <# #S 4 #S.zFill #> type .BL 1+ loop drop ;
 break;
 
 // : src (source) @ ;

@@ -401,7 +401,7 @@ void ForthOS::MINUS()
 
 void ForthOS::MULT()
 {
-	PUSH(POP() + POP());
+	PUSH(POP() * POP());
 }
 
 void ForthOS::DIV()
