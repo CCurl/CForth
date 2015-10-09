@@ -517,21 +517,6 @@ void ForthOS::GOTO()
 	IP = MemGet(IP);
 }
 
-//void ForthOS::CALL()
-//{
-//	if ((MemGet(DEBUGFLAG_ADDRESS) == 1) && (output_fp != NULL))
-//	{
-//		CString txt;
-//		DumpInstr(IP - 1, txt);
-//		AppendOutput(txt);
-//		AppendOutput(_T("\n"));
-//	}
-//
-//	int addr = MemGet(IP++);
-//	RPUSH(IP); 
-//	IP = addr;
-//}
-
 void ForthOS::EMIT()
 {
 	int val = POP();
