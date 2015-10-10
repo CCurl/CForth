@@ -517,6 +517,27 @@ void ForthOS::GOTO()
 	IP = MemGet(IP);
 }
 
+void ForthOS::AND()
+{
+	int arg1 = POP();
+	int arg2 = POP();
+	PUSH(arg1 & arg2);
+}
+
+void ForthOS::OR()
+{
+	int arg1 = POP();
+	int arg2 = POP();
+	PUSH(arg1 | arg2);
+}
+
+void ForthOS::XOR()
+{
+	int arg1 = POP();
+	int arg2 = POP();
+	PUSH(arg1 ^ arg2);
+}
+
 void ForthOS::EMIT()
 {
 	int val = POP();

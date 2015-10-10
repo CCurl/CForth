@@ -61,9 +61,9 @@
 : LOOP   ?] IF 25 , ELSE [ 25 , ] THEN ; IMMEDIATE
 : +LOOP  ?] IF 26 , ELSE [ 26 , ] THEN ; IMMEDIATE
 : GOTO         27 , ;
-//             28 used to be . (DOT) , now it is obsolete
-//             29 used to be TYPE, now it is obsolete
-//             30 used to be CALL, now it is obsolete
+: AND    ?] IF 28 , ELSE [ 28 , ] THEN ; IMMEDIATE
+: OR     ?] IF 29 , ELSE [ 29 , ] THEN ; IMMEDIATE
+: XOR    ?] IF 30 , ELSE [ 30 , ] THEN ; IMMEDIATE
 //             31 used to be OVER, now it is obsolete
 : EMIT   ?] IF 32 , ELSE [ 32 , ] THEN ; IMMEDIATE
 : DICTP        33 , ;                              // NOOP to skip over the dictionary entry back pointer
@@ -112,6 +112,7 @@
 : decimal 10 base ! ;
 : hex 16 base ! ;
 : binary 2 base ! ;
+: ?hex base @ 10 > ; 
 
 : +! dup @ rot + swap ! ;
 : -! dup @ rot - swap ! ;
@@ -219,6 +220,7 @@ variable #S.isNeg
 : .S '<' EMIT DEPTH <# #S #> type '>' EMIT .BL DEPTH IF -1 DEPTH 1- 1- DO I PICK . -1 +LOOP THEN ;
 
 : forget.last  LAST HEAD>BODY (HERE) ! LAST DUP @ + 1+ (LAST) ! ;
+
 
 VARIABLE .cw.
 : word.this .cw. @ ;
@@ -352,16 +354,41 @@ VARIABLE .cw.
 // If I need it, I can add some later.
 // This is all I need for now ... :)
 
-variable tmp.sp 32 allot
-: 0tmp.sp tmp.sp 0! ;
-: tmp@ tmp.sp @ if tmp.sp dup @ + @ then ;
-: !tmp tmp.sp @ if tmp.sp dup @ + ! then ;
-: >tmp tmp.sp @ 31 < if tmp.sp .inc. !tmp then ;
-: tmp> tmp.sp @      if tmp@ tmp.sp .dec. then ;
-: tmp.swap tmp> tmp> swap >tmp >tmp ;
-: tmp.drop tmp> drop ;
+variable t.sp 32 allot
+: 0t.sp t.sp 0! ;
+: t@ t.sp @ if t.sp dup @ + @ then ;
+: t! t.sp @ if t.sp dup @ + ! then ;
+: >t t.sp @ 31 < if t.sp .inc. t! then ;
+: t> t.sp @      if t@ t.sp .dec. then ;
+: t.swap t> t> swap >t >t ;
+: t.drop t> drop ;
 
 : SPACES 0 DO .BL LOOP ;
+
+: #.convStr " 0123456789ABCDEF" ;
+: #N.isNum // ( c -- num bool )
+	false >t 0 >t
+	to-upper #.convstr 1+ base @ 1+ 0 
+	do 
+		2dup @ = 
+		if 
+			t.drop t.drop i true >t >t leave
+		else 
+			1+
+		then
+	loop 
+	2drop
+	t> t> ; 
+: <N 0 -rot false #S.isNeg ! ; // ( addr num -- 0 addr num )
+: N> rot #S.isNeg if negate then ; // ( n addr num -- addr num n )
+: #N // ( n1 c -- n2 bool )
+	#N.isNum
+	if 
+		swap base @ * + true
+	else
+		drop false
+	then
+	; 
 
 : dump 0 do dup @ <# #S 4 #S.zFill #> type .BL 1+ loop drop ;
 .cr .cr words

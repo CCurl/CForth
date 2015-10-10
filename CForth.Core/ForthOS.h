@@ -199,6 +199,9 @@ class ForthOS
 	void LOOP();
 	void PLUSLOOP();
 	void GOTO();
+	void AND();
+	void OR();
+	void XOR();
 	void EMIT();
 	void DICTP();
 	void FOPEN();
