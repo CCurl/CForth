@@ -89,12 +89,6 @@ void ForthOS::BootStrap()
 		I_RETURN, COMPILE_BREAK);
 	int xtSource = Create(StringToMem(INPUT_BUFFER, _T("SOURCE")), FLAG_IS_NORMAL, xt);
 
-	// .str+.
-	xt = Compile(MODE_BOOT,
-		I_DUP, xtInc, I_DUP, I_FETCH, I_PLUS, I_STORE,
-		I_RETURN, COMPILE_BREAK);
-	int xtStrPlus = Create(StringToMem(INPUT_BUFFER, _T(".str+.")), FLAG_IS_NORMAL, xt);
-
 	// >IN
 	xt = Compile(MODE_BOOT,
 		I_LITERAL, TOIN_ADDRESS,
@@ -131,7 +125,7 @@ void ForthOS::BootStrap()
 		/**/ I_IF_RT, 4,
 		/******/ I_DROP, I_LEAVE,
 		/**/ I_GOTO, 4,
-		/******/ xtPad, xtStrPlus,
+		/******/ xtPad, I_SPUSH,
 		/******/ xtToIN, xtInc,
 		I_LOOP, I_DROP,
 

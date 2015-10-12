@@ -58,6 +58,8 @@ ForthOS::ForthOS(int memSize)
 	prims[I_XOR] = &ForthOS::XOR;
 	prims[I_EMIT] = &ForthOS::EMIT;
 	prims[I_DICTP] = &ForthOS::DICTP;
+	prims[I_SPUSH] = &ForthOS::SPUSH;
+	prims[I_SPOP] = &ForthOS::SPOP;
 	prims[I_FOPEN] = &ForthOS::FOPEN;
 	prims[I_FCLOSE] = &ForthOS::FCLOSE;
 	prims[I_FREAD] = &ForthOS::FREAD;

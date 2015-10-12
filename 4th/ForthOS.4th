@@ -67,8 +67,8 @@
 //             31 used to be OVER, now it is obsolete
 : EMIT   ?] IF 32 , ELSE [ 32 , ] THEN ; IMMEDIATE
 : DICTP        33 , ;                              // NOOP to skip over the dictionary entry back pointer
-//             34 used to be -1, now it is obsolete
-//             35 used to be 0=, now it is obsolete
+: >S     ?] IF 34 , ELSE [ 34 , ] THEN ; IMMEDIATE
+: S>     ?] IF 35 , ELSE [ 35 , ] THEN ; IMMEDIATE
 : fopen  ?] IF 36 , ELSE [ 36 , ] THEN ; IMMEDIATE 
 : fclose ?] IF 37 , ELSE [ 37 , ] THEN ; IMMEDIATE 
 : fread  ?] IF 38 , ELSE [ 38 , ] THEN ; IMMEDIATE 
@@ -93,7 +93,7 @@
 : 2* 2 * ;
 : 2/ 2 / ;
 : 2+ 1+ 1+ ;
-: .dec. dup @ 1- swap ! ;
+: .dec. S> DROP ;
 : true -1 ; 
 : false 0 ;
 
@@ -101,12 +101,14 @@
 : 2DUP OVER OVER ;
 : ?DUP DUP IF DUP THEN ;
 
-: CLR DEPTH ?DUP IF 0 DO DROP LOOP THEN ;
 : NIP SWAP DROP ;
 : TUCK SWAP OVER ;
 : -ROT ROT ROT ;
 : NEGATE -1 * ;
 : ABS DUP 0 < IF NEGATE THEN ;
+
+: S@ dup @ + @ then ; 
+: S! dup @ ?dup if + ! then ;
 
 : mod 2dup / * - ;
 : decimal 10 base ! ;
@@ -116,23 +118,21 @@
 
 : +! dup @ rot + swap ! ;
 : -! dup @ rot - swap ! ;
-: 0! 0 SWAP ! ;
+: ON -1 SWAP ! ;
+: OFF 0 SWAP ! ;
 
 // string stuff
 : string, count dup , 0 do dup @ ,    1+ loop drop ;
 : TYPE ( addr n -- )  0 DO DUP @ EMIT 1+ LOOP DROP ;
 
-: STR+ DUP .INC. DUP @ + ! ;      // ( C ADDR -- ) 
-: STRCLR 0! ;               // ( ADDR -- ) 
-
 // ( from-addr to-addr -- ) 
 : STRCAT SWAP COUNT 0 DO 
-		DUP @ 2 PICK STR+ 1+
+		DUP @ 2 PICK >S 1+
 	LOOP 2DROP
 	;
 
 //	( from-addr to-addr -- )
-: STRCPY DUP STRCLR STRCAT ;
+: STRCPY DUP OFF STRCAT ;
 
 : ALLOCATE HERE SWAP 0 DO 0 , LOOP ;
 : ALLOT ALLOCATE DROP ;
@@ -176,7 +176,7 @@
 		0
 	THEN ;
 
-// ( C -- c )
+// ( c -- C )
 : TO-UPPER DUP 'a' 'z' BETWEEN IF 32 - THEN ;
 
 // Case insensitve string compare
@@ -203,24 +203,22 @@
 : NAME>HEAD 3 - ;
 : BODY>HEAD 1+ @ ;
 
-
 // <# #S #> ...
 variable #S.buf 32 allot
 here 1- constant #S.bufEnd
 variable #S.isNeg
-: <# #S.buf 0! dup 0 < #S.isNeg ! abs ;
+: <# #S.buf off dup 0 < #S.isNeg ! abs ;
 : #S.buf+ #S.bufEnd #S.buf @ - ! #S.buf .inc. ;
 : # /mod dup 9 > if 10 - 'A' + else '0' + then #S.buf+ ;
 : #S # begin ?dup if # else exit then repeat ;
 : #S.zFill dup #S.buf @ > if #S.buf @ do '0' #S.buf+ loop else drop then ;
 : #> #s.isNeg @ if '-' #S.buf+ false #S.isNeg ! then #S.buf @ dup #S.bufEnd swap - >R R@ ! R> count ;
 : #S.rJ dup #S.buf @ > if #S.buf @ do BL #S.buf+ loop else drop then ;
-: . <# #S #> type .BL ;
 
-: .S '<' EMIT DEPTH <# #S #> type '>' EMIT .BL DEPTH IF -1 DEPTH 1- 1- DO I PICK . -1 +LOOP THEN ;
+: . <# #S #> type .BL ;
+: .S '<' EMIT DEPTH <# #S #> type '>' EMIT .BL DEPTH IF -1 DEPTH 2 - DO I PICK . -1 +LOOP THEN ;
 
 : forget.last  LAST HEAD>BODY (HERE) ! LAST DUP @ + 1+ (LAST) ! ;
-
 
 VARIABLE .cw.
 : word.this .cw. @ ;
@@ -248,7 +246,7 @@ VARIABLE .cw.
 	REPEAT
 	;
 
-: ' .word. PAD FIND 0= IF DROP THEN ;
+: ' .word. PAD FIND 0= IF DROP false THEN ;
 : EXECUTE ( addr -- ) ?DUP IF >R THEN ;
 
 : FILL ( addr n b -- ) -ROT OVER + SWAP DO DUP I ! LOOP DROP ;
@@ -295,13 +293,13 @@ VARIABLE .cw.
 	;
 
 : .collect. ( addr delim -- )
-	>R DUP strclr
+	>R DUP off
 	SOURCE >IN @ 1+
 	DO DUP I + @ DUP R@ = 
 		IF 
 			2DROP I 1+ >IN ! LEAVE 
 		ELSE
-			2 PICK str+ 
+			2 PICK >S 
 		THEN 
 	LOOP
 	R> 2DROP
@@ -347,19 +345,27 @@ VARIABLE .cw.
 
 : debug.on .cr 1 DBG.FLG ! ;
 : debug.on.high .cr 2 DBG.FLG ! ;
-: debug.off DBG.FLG 0! .cr ;
+: debug.off DBG.FLG off .cr ;
 
 // Simple temporary variables.
 // Sure, these could have more error checking.
 // If I need it, I can add some later.
 // This is all I need for now ... :)
 
-variable t.sp 32 allot
-: 0t.sp t.sp 0! ;
-: t@ t.sp @ if t.sp dup @ + @ then ;
-: t! t.sp @ if t.sp dup @ + ! then ;
-: >t t.sp @ 31 < if t.sp .inc. t! then ;
-: t> t.sp @      if t@ t.sp .dec. then ;
+// variable t.sp 32 allot
+// : 0t.sp t.sp off ;
+// : t@ t.sp @ if t.sp dup @ + @ then ;
+// : t! t.sp @ if t.sp dup @ + ! then ;
+// : >t t.sp @ 31 < if t.sp .inc. t! then ;
+// : t> t.sp @      if t@ t.sp .dec. then ;
+// : t.swap t> t> swap >t >t ;
+// : t.drop t> drop ;
+
+variable tmpVars 32 allot
+: t@ tmpVars S@ ;
+: t! tmpVars S! ;
+: >t tmpVars >S ;
+: t> tmpVars S> ;
 : t.swap t> t> swap >t >t ;
 : t.drop t> drop ;
 
@@ -396,7 +402,7 @@ variable t.sp 32 allot
 break;
 
 // : src (source) @ ;
-// : readline src strclr begin stdin fgetc dup CR = if drop exit else dup emit src str+ then repeat ;
+// : readline src off begin stdin fgetc dup CR = if drop exit else dup emit src >S then repeat ;
 
 // variable cmds 100 allot
 

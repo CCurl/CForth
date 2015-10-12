@@ -204,6 +204,8 @@ class ForthOS
 	void XOR();
 	void EMIT();
 	void DICTP();
+	void SPUSH();
+	void SPOP();
 	void FOPEN();
 	void FCLOSE();
 	void FREAD();

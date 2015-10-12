@@ -326,6 +326,31 @@ void ForthOS::FETCH()
 	PUSH(MemGet(POP()));
 }
 
+// pops a val off the specified stack
+void ForthOS::SPOP()
+{
+	int stack = POP();
+	int depth = MemGet(stack);
+	if (depth > 0)
+	{
+		int val = MemGet(stack + depth);
+		MemSet(stack, depth - 1);
+	}
+	else
+	{
+	}
+}
+
+// pushes a val onto the specified stack
+void ForthOS::SPUSH()
+{
+	int stack = POP();
+	int val = POP();
+	int depth = MemGet(stack)+1;
+	MemSet(stack + depth, val);
+	MemSet(stack, depth);
+}
+
 void ForthOS::STORE()
 {
 	int addr = POP();

@@ -1,29 +1,40 @@
-: lists.4th ;
+forget lists.module
+
+: Lists.Module ;
 
 // lists ... they look like this ...
-// int prev;         // addr of previous node, 0 = first
-// int next;         // addr of next node, 0 = last
-// int state;        // 1 = active, 0 = deleted
-// int payload.size; // standard counted array
-// int payload[];    //
+// int prev;     // addr of previous node, 0 = first
+// int next;     // addr of next node, 0 = last
+// int data;     // address of entry
 
-: list.add.node ( payload last-node --- new-node )
-	HERE >R , 0 , 1 , string,
+: prevNode @ ;      //  ( node -- prev-node|0 )
+: nextNode 1+ @ ;   //  ( node -- next-node|0 )
+: node@ 1+ 1+ @ ;  //  ( node -- val )
+: node! 1+ 1+ ! ;  //  ( val node -- )
+
+: list.addNode ( last-node --- new-node )
+	HERE >R , 0 , 0 , 
 	R@ @ ?DUP IF
 		R@ SWAP 1+ !
 	THEN
 	R>
 	;
 
-: list.node.prev    ( node -- prev-node ) @ ;
-: list.node.next    ( node -- next-node ) 1+ @ ;
-: list.node.state   ( node -- state )     2+ ;
-: list.node.payload ( node -- payload )   3 + ;
-: list.node.state   ( node -- )           list.node.state 0 swap ! ;
+: list.deleteNode >R // ( this -- )
+	R@ @ ?DUP IF
+		1+ R@ 1+ @ SWAP ! // prevNode.next now points to this.next
+	THEN
 
-: list.goto.last ( node -- last-node )
+	R@ 1+ @ ?DUP IF
+		R@ @ SWAP !      // nextNode.prev now points to this.prev
+	THEN
+
+	R> DROP
+	;
+
+: list.last ( node -- last-node )
 	begin
-		dup list.node.next ?dup 
+		dup nextNode ?dup 
 		if 
 			nip
 		else
@@ -32,9 +43,9 @@
 	repeat
 	;
 
-: list.goto.first ( node -- last-node )
+: list.first ( node -- last-node )
 	begin
-		dup list.node.prev ?dup 
+		dup prevNode ?dup 
 		if 
 			nip
 		else
@@ -43,8 +54,29 @@
 	repeat
 	;
 
-// NB: the payload is a standard counted array
-: list.add ( payload list --- new-node ) list.goto.last list.add.node ;
+// NB: the addr is stored as is in the list
+: list.add ( list --- new-node ) list.last list.addNode ;
+: list.new ( -- new-list ) 0 list.addNode ;
+: list.dump begin ?dup if dup node@ . nextNode else exit then repeat ;
 
-// Create a new list like this ... first-payload list.new
-: list.new ( payload --- new-list ) 0 list.add.node ;
+: list.findVal ( val list -- node|0 )
+	begin
+		dup node@ 2 pick =
+		if 
+			nip exit
+		then
+		nextnode dup 0=
+		if
+			nip exit
+		then
+	repeat
+	;
+
+// example ...
+// variable tl 
+// 111 list.new dup tl ! node!
+// 222 tl @ list.add node!
+// 333 tl @ list.add node!
+// 444 tl @ list.add node!
+// last tl @ list.add node!
+// tl @ list.dump
