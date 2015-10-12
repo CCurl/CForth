@@ -334,10 +334,8 @@ void ForthOS::SPOP()
 	if (depth > 0)
 	{
 		int val = MemGet(stack + depth);
+		PUSH(val);
 		MemSet(stack, depth - 1);
-	}
-	else
-	{
 	}
 }
 

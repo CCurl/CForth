@@ -116,7 +116,7 @@
 : binary 2 base ! ;
 : ?hex base @ 10 > ; 
 
-: +! dup @ rot + swap ! ;
+: +! dup ..@ rot + swap ! ;
 : -! dup @ rot - swap ! ;
 : ON -1 SWAP ! ;
 : OFF 0 SWAP ! ;
@@ -139,16 +139,13 @@
 : CONSTANT CREATE DICTP LAST , PUSH , RETURN, ;
 : VARIABLE HERE 5 + CONSTANT 0 , ;
 
+// These should both end up with the same machine code
 32 CONSTANT BL
 : CR 13 ;
 
-: .ISWS.
-	DUP 13 = IF DROP BL THEN
-	DUP 10 = IF DROP BL THEN
-	DUP BL = ;
-
-// ( c min max -- bool )
-: BETWEEN 2 PICK >= >R >= R> = ;
+: BETWEEN 2 PICK >= -ROT >= = ;     // ( c min max -- bool )
+: min 2dup < if drop else nip then ; // ( a b -- a|b )
+: max 2dup > if drop else nip then ; // ( a b -- a|b )
 
 // ( n -- q r )
 : /MOD DUP BASE @ / DUP BASE @ * ROT SWAP - ;
@@ -163,11 +160,11 @@
 		-1 >R
 		1+ SWAP COUNT 0 
 		DO
-			2DUP @ SWAP @ <>
+			2DUP @ SWAP @ =
 			IF 
-				R> DROP 0 >R LEAVE 
-			ELSE
 				1+ SWAP 1+
+			ELSE
+				R> DROP 0 >R LEAVE 
 			THEN
 		LOOP
 		2DROP R>
@@ -185,11 +182,11 @@
 		-1 >R
 		1+ SWAP COUNT 0 
 		DO
-			2DUP @ TO-UPPER SWAP @ TO-UPPER <>
+			2DUP @ TO-UPPER SWAP @ TO-UPPER =
 			IF 
-				R> DROP 0 >R LEAVE 
-			ELSE
 				1+ SWAP 1+
+			ELSE
+				R> DROP 0 >R LEAVE 
 			THEN
 		LOOP
 		2DROP R>
@@ -386,7 +383,7 @@ variable tmpVars 32 allot
 	2drop
 	t> t> ; 
 : <N 0 -rot false #S.isNeg ! ; // ( addr num -- 0 addr num )
-: N> rot #S.isNeg if negate then ; // ( n addr num -- addr num n )
+: N> rot #S.isNeg if negat1 2 3e then ; // ( n addr num -- addr num n )
 : #N // ( n1 c -- n2 bool )
 	#N.isNum
 	if 
